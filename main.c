@@ -12,20 +12,7 @@
 -2 implementare a quasta funzione il multithread, il numero di tread viene passato come parametro al main()
 */
 
-struct MemoryStruct {
-  char *memory;
-  size_t size;
-};
-
-struct ParserStruct {
-  int ok;
-  size_t tags;
-  size_t depth;
-  struct MemoryStruct characters;
-};
-
-
-char symbols[] = "abcdefghijklmnopqrstuvwxyz0123456789-.";
+static char symbols[] = "abcdefghijklmnopqrstuvwxyz0123456789-.";
 
 int main(int argc, char const *argv[]) {
   unsigned maxLen = 0;
@@ -42,7 +29,7 @@ int main(int argc, char const *argv[]) {
 }
 
 
-int brute(unsigned maxLen){
+static int brute(unsigned maxLen){
   BRUTEFORCE_HANDLE bfhandler;
   if (!bruteforce_init(&bfhandler, maxLen, BF_FLAG_CUSTOM, symbols, NULL)) {
     printf("%sFailed to initialize bruteforce.%s\n", RED, RST);
@@ -57,7 +44,7 @@ int brute(unsigned maxLen){
 }
 
 
-short makeConnection(char *subdomain){
+static short makeConnection(char *subdomain){
   bool success = false;
   const char domain[17] = ".s3.amazonaws.com";
   char *link = linkcreator(subdomain, domain);
@@ -69,6 +56,7 @@ short makeConnection(char *subdomain){
   curl = curl_easy_init();
   if(curl) {
     curl_easy_setopt(curl, CURLOPT_URL, link);
+    curl_easy_setopt(curl, CURLOPT_FAILONERROR, 1);
     curl_easy_setopt(curl, CURLOPT_NOBODY, 1);
 
     res = curl_easy_perform(curl);
@@ -91,7 +79,7 @@ short makeConnection(char *subdomain){
 }
 
 
-char *linkcreator(const char* s1, const char* s2){
+static char *linkcreator(const char* s1, const char* s2){
   char *result = malloc(strlen(s1) + strlen(s2) + 1);
   if (result == NULL) {
     printf("%sOut of memory.%s\n", RED, RST);
