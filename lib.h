@@ -21,6 +21,7 @@
 
 /*Prototypes*/
 static int brute(unsigned maxLen); // bruteforce subroutine
+static int wordlistAttack(char *wordlistFile); // wordlist attack subroutine
 static short makeConnection(char *subdomain); // called by bruteforce() to try make a connection (return 1 if connection is done)
 static char *linkcreator(const char* s1, const char* s2); // append `.s3.amazonaws.com` to generated string
 static int dbInsert(char *name, char *link); // insert successul link in database

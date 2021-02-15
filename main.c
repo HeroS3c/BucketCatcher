@@ -19,6 +19,7 @@ static double size = 0;
 
 int main(int argc, char const *argv[]) {
   bool wordlist = false;
+  char *wordlistFile = argv[1];
   unsigned maxLen = 0;
   if (argv[1] && strstr(argv[1], ".txt")) {
     wordlist = true;
@@ -44,12 +45,27 @@ int main(int argc, char const *argv[]) {
   if (!wordlist) {
     brute(maxLen);
   }else{
-    /*wordlist attack*/
+    wordlistAttack(wordlistFile);
   }
 
   return 0;
 }
 
+static int wordlistAttack(char *wordlistFile){
+  signal(SIGINT, end);
+  FILE *file;
+  ssize_t read;
+  size_t len = 0;
+  char *line = NULL;
+
+  file = fopen(wordlistFile, "r");
+  while ((read = getline(&line, &len, file)) != -1) {
+    char *newline = strchr(line, '\n');
+    if (newline)
+      *newline = 0;
+    makeConnection(line);
+  }
+}
 
 static int brute(unsigned maxLen){ // bruteforce subroutine
   signal(SIGINT, end);
@@ -79,7 +95,7 @@ static short makeConnection(char *subdomain){ // called by bruteforce() to try m
 
   curl = curl_easy_init();
   if(curl) {
-    curl_easy_setopt(curl, CURLOPT_URL, "https://pinterest.s3.amazonaws.com/");
+    curl_easy_setopt(curl, CURLOPT_URL, link);
     curl_easy_setopt(curl, CURLOPT_FAILONERROR, 1);
     curl_easy_setopt(curl, CURLOPT_NOBODY, 1);
     if (sizeInfo) {
