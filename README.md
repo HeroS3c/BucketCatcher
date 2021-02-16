@@ -11,5 +11,8 @@ Please note: although the tool is usable, it is not complete and may have bugs.
 
 ## Create a database with the results, making navigation easy
 a simple snip of results
+
+
+
 ![strikedS3.db](https://i.imgur.com/tlc5VcV.png)
 
