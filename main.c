@@ -6,8 +6,8 @@
 #include <expat.h>
 #include <sqlite3.h>
 #include <signal.h>
-#include "bruteforce.h"
-#include "lib.h"
+#include "lib/bruteforce.h"
+#include "lib/lib.h"
 
 /*DA FARE:
 -1 implementare il multithread, il numero di tread viene passato come parametro al main()
@@ -57,14 +57,33 @@ static int wordlistAttack(char *wordlistFile){
   ssize_t read;
   size_t len = 0;
   char *line = NULL;
-
-  file = fopen(wordlistFile, "r");
+  unsigned lines = 0;
+  file = fopen(wordlistFile, "r"); // open file to count lines
+  if ( file == NULL ) {
+    return -1;
+  }
+  lines = lineCounter(file);
+  file = fopen(wordlistFile, "r"); // reopen file co read each line
+  if ( file == NULL ) {
+    return -1;
+  }
+  unsigned currline = 1;
   while ((read = getline(&line, &len, file)) != -1) {
     char *newline = strchr(line, '\n');
     if (newline)
       *newline = 0;
-    makeConnection(line);
+    unsigned short percent = (currline*100)/lines;
+    makeConnection(line, percent);
+    currline++;
   }
+}
+
+
+static unsigned lineCounter(FILE *file){
+  unsigned lines = 0;
+  while (EOF != (fscanf(file, "%*[^\n]"), fscanf(file,"%*c")))
+        ++lines;
+  return lines;
 }
 
 static int brute(unsigned maxLen){ // bruteforce subroutine
@@ -76,7 +95,7 @@ static int brute(unsigned maxLen){ // bruteforce subroutine
   }
 
   while(bruteforce_update(&bfhandler) && bRunning){
-    makeConnection(bfhandler.bfText);
+    makeConnection(bfhandler.bfText, -1);
   }
 
   bruteforce_finalize(&bfhandler);
@@ -84,11 +103,16 @@ static int brute(unsigned maxLen){ // bruteforce subroutine
 }
 
 
-static short makeConnection(char *subdomain){ // called by bruteforce() to try make a connection (return 1 if connection is done)
+static short makeConnection(char *subdomain, int percent){ // called by bruteforce() to try make a connection (return 1 if connection is done)
   bool success = false;
   const char domain[17] = ".s3.amazonaws.com";
   char *link = linkcreator(subdomain, domain);
-  printf("%sTrying %s...%s\n", YEL, link, RST);
+  if (percent >= 0) {
+    printf("%sTrying %s... (%d%%)%s\n", YEL, link, percent, RST); // in case of wordlist attack (we have a progress)
+  }else{
+    printf("%sTrying %s... %s\n", YEL, link, RST); // in case of bruteforce (runs until we stop, so progress to print out)
+  }
+
   /*connection*/
   CURL *curl;
   CURLcode res;
@@ -194,14 +218,20 @@ static void end() {
     case 'y':
     case 'Y':
       report();
+      endwin();
+      exit(0);
     break;
     default:
-      EOF;
+      endwin();
+      exit(0);
   }
 }
 
 
 static void report(void) {
+  printf("Function yet to be implemented, you can find the results in strikedS3.db"); // TO FINISH
+
+    
   sqlite3 *db;
   sqlite3_stmt *res;
 
