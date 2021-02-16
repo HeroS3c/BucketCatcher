@@ -10,7 +10,7 @@ Please note: although the tool is usable, it is not complete and may have bugs.
 
 
 ## Create a database with the results, making navigation easy
-a simple snip of results
+a simple snip of results using 'wordlist.txt' provided
 
 
 
